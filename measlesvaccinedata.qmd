@@ -1,0 +1,34 @@
+---
+title: "measlesvaccinedata"
+format: html
+---
+
+# Install Packages
+
+```{r}
+library(ggplot2)
+library(tidyr)
+library(dplyr)
+library(janitor)
+library(gtsummary)
+```
+
+# Dataset
+
+## Loading Dataset
+
+```{r}
+# load dataset
+measles <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2020/2020-02-25/measles.csv')
+
+# make sure dataset loaded correctly
+head(measles)
+```
+
+## Cleaning/Wrangling Dataset
+
+```{r}
+measles1 <- measles |> filter(!is.na(measles$state))
+measles2 <- measles1 |> filter(!is.na(measles1$type))
+measles3 <- measles2 |> filter(!is.na(measles2$enroll))
+```
