@@ -48,7 +48,19 @@ plot(mmr ~ enroll, data = measles6)
 # Modeling
 
 ```{r}
-glm1 <- glm(mmr ~ type + state + enroll,
-            data = measles6,
-            family = binomial)
+# no transformations
+lm1 <- lm(mmr ~ type + state + enroll, data = measles6)
+summary(lm1)
+plot(lm1, 1:2)
+```
+
+```{r}
+# log transformation on response
+lm2 <- lm(log(mmr) ~ type + state + enroll, data = measles6)
+summary(lm2)
+plot(lm2, 1:2)
+```
+
+```{r}
+step(lm2, trace = 1)
 ```
