@@ -29,7 +29,7 @@ head(measles)
 
 ```{r}
 measles0 <- measles |> select(!(lat:lng))
-measles1 <- data.frame(unique(measles1))
+measles1 <- data.frame(unique(measles0))
 measles2 <- measles1 |> filter(!is.na(measles1$state))
 measles3 <- measles2 |> filter(!is.na(measles2$type))
 measles4 <- measles3 |> filter(!is.na(measles3$enroll))
@@ -43,4 +43,12 @@ measles6 <- measles5 |> filter(measles5$type != "Kindergarten")
 boxplot(mmr ~ type, data = measles6)
 boxplot(mmr ~ state, data = measles6)
 plot(mmr ~ enroll, data = measles6)
+```
+
+# Modeling
+
+```{r}
+glm1 <- glm(mmr ~ type + state + enroll,
+            data = measles6,
+            family = binomial)
 ```
