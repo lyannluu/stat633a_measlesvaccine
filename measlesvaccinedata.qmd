@@ -56,11 +56,36 @@ plot(lm1, 1:2)
 
 ```{r}
 # log transformation on response
-lm2 <- lm(log(mmr) ~ type + state + enroll, data = measles6)
+lm2 <- lm(log(mmr) ~ type + state + log(enroll), data = measles6)
 summary(lm2)
 plot(lm2, 1:2)
 ```
 
+## Remove Outliers
+
 ```{r}
-step(lm2, trace = 1)
+ind1 <- which(abs(rstandard(lm2)) > 2)
+measles6[ind1, ]
+measles7 <- measles6[-ind1, ]
+```
+
+```{r}
+lm3 <- lm(log(mmr) ~ type + state + enroll, data = measles7)
+summary(lm3)
+plot(lm3, 1:2)
+```
+
+```{r}
+lm4 <- lm(sqrt(mmr) ~ type + state + enroll, data = measles7)
+summary(lm4)
+plot(lm4, 1:2)
+```
+
+```{r}
+# remove Colorado
+measles8 <- measles7 |> filter(measles7$state != "Colorado")
+
+lm5 <- lm(sqrt(mmr) ~ type + state + enroll, data = measles8)
+summary(lm5)
+plot(lm5, 1:2)
 ```
