@@ -177,4 +177,23 @@ measles_ca2 <- measles_ca[-ind1, ]
 ```{r}
 boxplot(mmr ~ type, data = measles_ca2)
 plot(mmr ~ enroll, data = measles_ca2)
+
+lm_ca2 <- lm(mmr ~ type + enroll, data = measles_ca2)
+summary(lm_ca2)
+AIC(lm_ca2)
+```
+
+```{r}
+# remove outliers
+ind2 <- which(measles_ca2$enroll > 600)
+measles_ca2[ind2, ]
+measles_ca3 <- measles_ca2[-ind2, ]
+
+boxplot(mmr ~ type, data = measles_ca3)
+plot(mmr ~ enroll, data = measles_ca3)
+
+lm_ca3 <- lm(mmr ~ type + enroll, data = measles_ca3)
+summary(lm_ca3)
+AIC(lm_ca3)
+plot(lm_ca3, 1:2)
 ```
