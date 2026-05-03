@@ -89,3 +89,9 @@ lm5 <- lm(sqrt(mmr) ~ type + state + enroll, data = measles8)
 summary(lm5)
 plot(lm5, 1:2)
 ```
+
+```{r}
+lm6 <- lm(sqrt(mmr) ~ type + state + enroll + type*state + type*enroll + state*enroll, data = measles8)
+summary(lm6)
+plot(lm6, 1:2)
+```
