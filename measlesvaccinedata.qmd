@@ -95,3 +95,26 @@ lm6 <- lm(sqrt(mmr) ~ type + state + enroll + type*state + type*enroll + state*e
 summary(lm6)
 plot(lm6, 1:2)
 ```
+
+```{r}
+lm7 <- lm(sqrt(mmr) ~ type + state + poly(enroll, 8), data = measles8)
+summary(lm7)
+
+# stop at 8th order -> insignificant
+```
+
+```{r}
+# stick with 7th order for enroll
+
+lm8 <- lm((mmr)^8 ~ type + state + poly(enroll, 7), data = measles8)
+summary(lm8)
+plot(lm8, 1:2)
+```
+
+```{r}
+# add interactions
+
+lm9 <- lm((mmr)^8 ~ type + state*poly(enroll, 7), data = measles8)
+summary(lm9)
+plot(lm9, 1:2)
+```
