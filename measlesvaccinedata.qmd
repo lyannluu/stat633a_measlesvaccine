@@ -56,7 +56,7 @@ plot(lm1, 1:2)
 
 ```{r}
 # log transformation on response
-lm2 <- lm(log(mmr) ~ type + state + log(enroll), data = measles6)
+lm2 <- lm(log(mmr) ~ type + state + enroll, data = measles6)
 summary(lm2)
 plot(lm2, 1:2)
 ```
@@ -117,4 +117,64 @@ plot(lm8, 1:2)
 lm9 <- lm((mmr)^8 ~ type + state*poly(enroll, 7), data = measles8)
 summary(lm9)
 plot(lm9, 1:2)
+```
+
+```{r}
+n <- nrow(measles8)
+step(lm9, trace = 2)
+```
+
+```{r}
+lm10 <- lm((mmr)^13 ~ type + state*poly(enroll,7), data = measles6)
+summary(lm10)
+plot(lm10, 1:2)
+AIC(lm10)
+```
+
+# Starting from Scratch
+
+Research question changed to only focus on Colorado
+
+```{r}
+measles_ut <- measles6 |> filter(measles6$state == "Utah")
+
+boxplot(mmr ~ type, data = measles_ut)
+plot(mmr ~ enroll, data = measles_ut)
+```
+
+```{r}
+# linear model
+lm_ut <- lm(mmr ~ type + enroll, data = measles_ut)
+summary(lm_ut)
+```
+
+```{r}
+# remove outliers
+ind1 <- which(abs(rstandard(lm_ut)) > 2)
+measles_ut[ind1, ]
+measles_ut2 <- measles_ut[-ind1, ]
+```
+
+```{r}
+measles_ca <- measles6 |> filter(measles6$state == "California")
+
+boxplot(mmr ~ type, data = measles_ca)
+plot(mmr ~ enroll, data = measles_ca)
+```
+
+```{r}
+lm_ca <- lm(mmr ~ type + enroll, data = measles_ca)
+summary(lm_ca)
+```
+
+```{r}
+# remove outliers
+ind1 <- which(abs(rstandard(lm_ca)) > 2)
+measles_ca[ind1, ]
+measles_ca2 <- measles_ca[-ind1, ]
+```
+
+```{r}
+boxplot(mmr ~ type, data = measles_ca2)
+plot(mmr ~ enroll, data = measles_ca2)
 ```
