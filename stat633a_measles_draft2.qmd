@@ -1,0 +1,175 @@
+---
+title: "Final Project Code"
+format: 
+  html:
+    self-contained: TRUE
+---
+
+```{r}
+# Get the Data
+measles <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2020/2020-02-25/measles.csv')
+```
+
+```{r}
+library(ggplot2)
+library(tidyr)
+library(dplyr)
+```
+
+```{r}
+#getting rid of NA's within our variables of interest
+measles_data <- select(measles, state, enroll, mmr, type)
+
+measles_state <- measles_data |> filter(!is.na(measles_data$state))
+measles_type <- measles_state |> filter(!is.na(measles_state$type))
+measles_enroll <- measles_type |> filter(!is.na(measles_type$enroll))
+
+#getting rid of 
+measles_clean <- measles_enroll |> filter(measles_enroll$mmr != -1) 
+measles_clean2 <- measles_clean |> filter(measles_clean$type != "Kindergarten")
+```
+
+```{r}
+#summary statistics
+summary(measles_clean2$enroll) #enrollment -> quantitative, rest categorical
+```
+
+```{r}
+#boxplots
+boxplot(mmr ~ type, data = measles_clean2)
+boxplot(mmr ~ state, data = measles_clean2)
+```
+
+```{r}
+#scatter plot matrix
+plot(mmr ~ enroll, data = measles_clean2) #for enrollment (quantitative)
+```
+
+It appears that within all the initial plots that the data is [heavily
+skewed]{.underline} -\> log transformation should be in order.
+
+### Summary Statistics (raw)
+
+```{r}
+summary(measles_data$enroll)
+```
+
+```{r}
+boxplot(mmr ~ type, data = measles_data,
+        xlab = "School Type",
+        ylab = "Vaccination Rate (MMR)",
+        main = "Box Plot of Vaccination Rate vs School Type",
+        col = "green")
+boxplot(mmr ~ state, data = measles_data,
+        xlab = "State of Origin",
+        ylab = "Vaccination Rate (MMR)",
+        main = "Box Plot of Vaccination Rate vs State",
+        col = "orange")
+```
+
+## California Data
+
+```{r}
+measles_ca <- measles_clean2 |> filter(measles_clean2$state == "California")
+boxplot(mmr ~ type, data = measles_ca)
+plot(mmr ~ enroll, data = measles_ca)
+```
+
+```{r}
+lm_ca <- lm(mmr ~ type + enroll, data = measles_ca)
+summary(lm_ca)
+```
+
+```{r}
+#outliers removal
+ind1 <- which(abs(rstandard(lm_ca)) > 2)
+measles_ca2 <- measles_ca[-ind1, ]
+
+#outliers removal + getting the one
+#ind2 <- which(measles_ca2$enroll > 600)
+#measles_ca3 <- measles_ca2[-ind2, ]
+```
+
+```{r}
+#raw, outliers removed
+boxplot(mmr ~ type, data = measles_ca2)
+plot(mmr ~ enroll, data = measles_ca2)
+```
+
+```{r}
+#polynomial transformation
+lm_ca2 <- lm(log(mmr) ~ type + enroll, data = measles_ca2)
+summary(lm_ca2)
+
+#raw, outliers removed diagnostic models
+plot(lm_ca2, 1:2)
+
+#AIC calculation
+AIC(lm_ca2)
+```
+
+```{r}
+#polynomial transformation w/ interaction
+lm_ca3 <- lm(log(mmr) ~ type*enroll, data = measles_ca2)
+summary(lm_ca3)
+
+#raw, outliers removed diagnostic models
+plot(lm_ca3, 1:2)
+
+#AIC calculation
+AIC(lm_ca3)
+```
+
+```{r}
+#polynomial transformation w/ interaction
+lm_ca4 <- lm(log(mmr) ~ type*poly(enroll, 15), data = measles_ca2)
+summary(lm_ca4)
+
+# remove outliers
+ind2 <- which(abs(rstandard(lm_ca4)) > 2)
+measles_ca3 <- measles_ca2[-ind2, ]
+```
+
+```{r}
+lm_ca5 <- lm(log(mmr) ~ type*poly(enroll, 8), data = measles_ca3)
+summary(lm_ca5)
+
+#raw, outliers removed diagnostic models
+plot(lm_ca5, 1:2)
+
+#AIC calculation
+AIC(lm_ca5)
+
+# remove outliers
+ind3 <- which(abs(rstandard(lm_ca5)) > 2)
+measles_ca4 <- measles_ca3[-ind3, ]
+```
+
+```{r}
+lm_ca6 <- lm(log(mmr) ~ type*poly(enroll, 8), data = measles_ca4)
+summary(lm_ca6)
+
+#raw, outliers removed diagnostic models
+plot(lm_ca6, 1:2)
+
+#AIC calculation
+AIC(lm_ca6)
+```
+
+```{r}
+# remove outliers
+ind4 <- which(abs(rstandard(lm_ca6)) > 2)
+measles_ca5 <- measles_ca4[-ind4, ]
+
+# linear model
+lm_ca7 <- lm(log(mmr) ~ type*poly(enroll, 8), data = measles_ca5)
+summary(lm_ca7)
+
+#raw, outliers removed diagnostic models
+plot(lm_ca7, 1:2)
+
+step(lm_ca7)
+
+#AIC calculation
+AIC(lm_ca7)
+```
