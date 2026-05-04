@@ -1,0 +1,154 @@
+---
+title: "STAT 633A Final Code: Measles Vaccination Rate"
+author: "Lyann Luu & Christopher Nguyen"
+format:
+  html:
+    self-contained: true
+execute: 
+  echo: true
+---
+
+# Install Packages
+
+```{r}
+library(ggplot2)
+library(tidyr)
+library(dplyr)
+library(janitor)
+library(gtsummary)
+```
+
+# Load Dataset
+
+```{r}
+# load dataset
+measles <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2020/2020-02-25/measles.csv')
+
+# make sure dataset loaded correctly
+head(measles)
+```
+
+# Data Cleaning/Wrangling
+
+```{r}
+# remove latitude & longitude columns
+measles0 <- measles |> select(!(lat:lng))
+measles1 <- data.frame(unique(measles0))
+
+# remove NA's
+measles2 <- measles1 |> filter(!is.na(measles1$state))
+measles3 <- measles2 |> filter(!is.na(measles2$type))
+measles4 <- measles3 |> filter(!is.na(measles3$enroll))
+
+# remove MMR values of -1
+measles5 <- measles4 |> filter(measles4$mmr != -1)
+
+# remove Kindergarten type
+measles6 <- measles5 |> filter(measles5$type != "Kindergarten")
+
+# keep only California state
+measles_ca <- measles6 |> filter(measles6$state == "California")
+```
+
+# Initial Visualization
+
+```{r}
+boxplot(mmr ~ type, data = measles_ca)
+plot(mmr ~ enroll, data = measles_ca)
+```
+
+# Modeling
+
+```{r}
+# no transformations
+lm_ca1 <- lm(mmr ~ type + enroll, data = measles_ca)
+summary(lm_ca1)
+plot(lm_ca1, 1:2)
+```
+
+```{r}
+# log transformation on response
+lm_ca2 <- lm(log(mmr) ~ type + enroll, data = measles_ca)
+summary(lm_ca2)
+plot(lm_ca2, 1:2)
+```
+
+```{r}
+#outliers removal
+ind1 <- which(abs(rstandard(lm_ca2)) > 2)
+measles_ca2 <- measles_ca[-ind1, ]
+
+# visualizations after outliers removal
+boxplot(mmr ~ type, data = measles_ca2)
+plot(mmr ~ enroll, data = measles_ca2)
+```
+
+```{r}
+# remove bad leverage point
+ind2 <- which(measles_ca2$enroll > 600)
+measles_ca3 <- measles_ca2[-ind2, ]
+
+# visualizations after leverage point removal
+boxplot(mmr ~ type, data = measles_ca3)
+plot(mmr ~ enroll, data = measles_ca3)
+```
+
+``` {r}
+# 3rd order polynomial transformation on enroll
+lm_ca3 <- lm(log(mmr) ~ type + poly(enroll, 3), data = measles_ca3)
+summary(lm_ca3)
+
+# diagnostic models
+plot(lm_ca3, 1:2)
+
+# AIC calculation
+AIC(lm_ca3)
+```
+
+```{r}
+# remove outliers
+ind3 <- which(abs(rstandard(lm_ca3)) > 2)
+measles_ca4 <- measles_ca3[-ind3, ]
+
+# 2nd order polynomial transformation on enroll w/o outliers
+lm_ca4 <- lm(log(mmr) ~ type + poly(enroll, 2), data = measles_ca4)
+summary(lm_ca4)
+
+# diagnostic models
+plot(lm_ca4, 1:2)
+
+# AIC calculation
+AIC(lm_ca4)
+```
+
+```{r}
+# remove outliers
+ind4 <- which(abs(rstandard(lm_ca4)) > 2)
+measles_ca5 <- measles_ca4[-ind4, ]
+
+# 2nd order polynomial transformation on enroll w/o outliers
+lm_ca5 <- lm(log(mmr) ~ type + poly(enroll, 2), data = measles_ca5)
+summary(lm_ca5)
+
+# diagnostic models
+plot(lm_ca5, 1:2)
+
+# AIC calculation
+AIC(lm_ca5)
+```
+
+```{r}
+# remove outliers
+ind5 <- which(abs(rstandard(lm_ca5)) > 2)
+measles_ca6 <- measles_ca5[-ind5, ]
+
+# linear model
+lm_ca6 <- lm(log(mmr) ~ type + poly(enroll, 3), data = measles_ca6)
+summary(lm_ca6)
+
+# diagnostic models
+plot(lm_ca6, 1:2)
+
+# AIC calculation
+AIC(lm_ca6)
+```
